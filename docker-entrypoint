@@ -6,9 +6,13 @@ USER_ID=${USER_ID:-30000}
 id builder 2>/dev/null || \
     useradd --uid $USER_ID --create-home --home-dir /builder builder
 
-if [[ ! -e /builder/.ssh && -d /home/user/.ssh ]]; then
-  gosu builder ln -s /home/user/.ssh /builder/.ssh
-fi
+dirs=".ssh downloads sstate-cache"
+for dir in $dirs
+do
+  if [[ ! -e /builder/$dir && -d /home/user/$dir ]]; then
+    gosu builder ln -s /home/user/$dir /builder/$dir
+  fi
+done
 
 cd /builder
 exec gosu builder "$@"
